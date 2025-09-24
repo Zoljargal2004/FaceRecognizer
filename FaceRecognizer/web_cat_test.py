@@ -1,21 +1,25 @@
 import cv2
 
-cap = cv2.VideoCapture(0)  # try 1 if you have multiple cameras
+# Open default webcam (change 0 -> 1 for second camera)
+video_capture = cv2.VideoCapture(1, cv2.CAP_DSHOW)
 
-if not cap.isOpened():
-    print("❌ Cannot open camera")
-    raise SystemExit
+# Check if camera opened
+if not video_capture.isOpened():
+    print("Error: Could not open webcam")
+    exit()
 
 while True:
-    ret, frame = cap.read()
+    ret, frame = video_capture.read()
     if not ret:
-        print("⚠️ Failed to grab frame, continuing…")
-        continue
+        print("Failed to grab frame")
+        break
 
-    cv2.imshow("Webcam test (press q to quit)", frame)
+    # frame is already BGR
+    cv2.imshow("Webcam BGR", frame)
 
+    # Press 'q' to quit
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
-cap.release()
+video_capture.release()
 cv2.destroyAllWindows()
