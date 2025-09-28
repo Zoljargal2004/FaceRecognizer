@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import LoginForm from "@/components/auth/loginForm"
 
 export default function AuthPage() {
   const [mode, setMode] = useState("login")
@@ -12,6 +13,8 @@ export default function AuthPage() {
           <h1 className="text-4xl font-bold text-primary mb-2">FitTracker</h1>
           <p className="text-muted-foreground">Your fitness journey starts here</p>
         </div>
+
+        <LoginForm/>
 
         {/* {mode === "login" && (
           <LoginForm onToggleMode={() => setMode("signup")} onForgotPassword={() => setMode("forgot-password")} />
