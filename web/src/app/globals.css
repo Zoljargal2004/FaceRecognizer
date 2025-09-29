@@ -3,6 +3,19 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
 :root {
   /* Updated color scheme for fitness app with blue accents */
   --card: oklch(1 0 0);
