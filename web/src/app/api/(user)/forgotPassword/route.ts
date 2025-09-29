@@ -14,6 +14,28 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+    const old_OTP = await db
+      .collection("OTP")
+      .findOne({ email }, { sort: { createdAt: -1 } });
+
+    if (old_OTP) {
+      const lastCreated = new Date(old_OTP.createdAt);
+      const nextAllowed = new Date(lastCreated.getTime() + 10 * 60 * 1000); // 10 min later
+
+      if (nextAllowed > new Date()) {
+        const waitMinutes = Math.ceil(
+          (nextAllowed.getTime() - Date.now()) / 60000
+        );
+        return NextResponse.json(
+          {
+            error: `Please wait ${waitMinutes} minute(s) before requesting a new OTP`,
+            allow: nextAllowed
+          },
+          { status: 429 }
+        ); // 429 = Too Many Requests
+      }
+    }
+
     const number = Math.floor(Math.random() * 9000 + 1000);
     const res = await sendEmail(`OTP: ${number}`, email);
 
