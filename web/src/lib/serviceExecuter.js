@@ -4,7 +4,8 @@ export async function serviceExecuter(
   body,
   endpoint,
   method,
-  description = ""
+  description = "",
+  token = ""
 ) {
   try {
     const res = await fetch(`/api/${endpoint}`, {

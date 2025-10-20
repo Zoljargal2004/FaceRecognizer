@@ -8,6 +8,9 @@ folder_path = r"C:\Users\zoloo\Downloads\for_training"
 images = []
 names = []
 
+save_folder = "assets"
+os.makedirs(save_folder, exist_ok=True)  # create folder if not exists
+
 for file in os.listdir(folder_path):
     if file.endswith(".png"):
         img_path = os.path.join(folder_path, file)
@@ -21,7 +24,8 @@ print("Loaded faces:", names)
 
 data = {"encodings": images, "names": names}
 
-with open("encodings.pkl", "wb") as f:
+save_path = os.path.join(save_folder, "encodings.pkl")
+with open(save_path, "wb") as f:
     pickle.dump(data, f)
 
 print("Encodings saved to encodings.pkl")
