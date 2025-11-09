@@ -12,8 +12,6 @@ export const AuthProvider = ({ children }) => {
   const checkToken = async () => {
     const token = await cookieStore.get("bearer");
 
-    console.log("check:   ", token)
-
     if (!token) {
       router.push("/login");
       return;
@@ -23,7 +21,12 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     checkToken();
   }, [router]);
-  return <AuthContext.Provider value={{}}><header></header>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{}}>
+      <header></header>
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
 export const useAuth = () => useContext(AuthContext);

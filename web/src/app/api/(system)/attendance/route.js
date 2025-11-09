@@ -1,5 +1,7 @@
 import clientPromise from "@/lib/mongodb";
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import jwt from "jsonwebtoken";
 
 export async function POST(req) {
   try {
@@ -90,6 +92,7 @@ export async function PUT(req) {
     const todayRecord = await db.collection("attendance").findOne({
       email,
       createdAt: { $gte: startOfDay, $lte: endOfDay },
+      sort: { createdAt: -1 }, // newest first
     });
 
     if (!todayRecord) {
@@ -119,6 +122,48 @@ export async function PUT(req) {
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
+    );
+  }
+}
+
+export async function GET(req) {
+  try {
+    // 1. Get cookie
+    const cookieStore = cookies();
+    const token = cookieStore.get("bearer")?.value; // name of your cookie
+
+    if (!token) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // 2. Verify and decode token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const email = decoded.email; // depends on what you encoded in the token
+
+    if (!email) {
+      return NextResponse.json({ error: "Invalid token" }, { status: 400 });
+    }
+
+    // 3. Query database
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const client = await clientPromise;
+    const db = client.db("fitness");
+
+    const records = await db
+      .collection("attendance")
+      .find({ email, createdAt: { $gte: startOfDay, $lte: endOfDay } })
+      .toArray();
+
+    return NextResponse.json({ email, records });
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json(
+      { error: "Unauthorized or expired token" },
+      { status: 401 }
     );
   }
 }
