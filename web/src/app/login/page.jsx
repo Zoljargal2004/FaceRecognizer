@@ -6,7 +6,6 @@ import ForgotPasswordForm from "@/components/auth/forgotPassword";
 
 export default function AuthPage() {
   const [mode, setMode] = useState("login");
-  console.log(mode)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted flex items-center justify-center p-4">

@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 
-export async function POST(req: Request) {
+export async function POST(req :Request) {
   try {
     const { email } = await req.json();
 
@@ -92,7 +92,7 @@ export async function PUT(req: Request) {
 
     return NextResponse.json({ message: "Profile updated successfully" });
   } catch (e) {
-    console.log(e)
+    console.error(e)
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

@@ -32,7 +32,7 @@
     ".next/types/**/*.ts",
     "**/*.ts",
     "**/*.tsx"
-  ],
+, "src/components/general/sidebar.jsx", "src/app/api/(user)/createNewPassword/route.js"  ],
   "exclude": [
     "node_modules"
   ]

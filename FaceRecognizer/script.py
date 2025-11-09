@@ -3,7 +3,7 @@ import os
 import pickle
 
 # Path to your folder
-folder_path = r"C:\Users\zoloo\Downloads\for_training"
+folder_path = r"D:\for_training"
 
 images = []
 names = []
