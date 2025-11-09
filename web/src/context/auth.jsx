@@ -23,7 +23,6 @@ export const AuthProvider = ({ children }) => {
   }, [router]);
   return (
     <AuthContext.Provider value={{}}>
-      <header></header>
       {children}
     </AuthContext.Provider>
   );

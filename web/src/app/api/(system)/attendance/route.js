@@ -129,8 +129,8 @@ export async function PUT(req) {
 export async function GET(req) {
   try {
     // 1. Get cookie
-    const cookieStore = cookies();
-    const token = cookieStore.get("bearer")?.value; // name of your cookie
+    const cookieStore = await cookies();
+    const token = await cookieStore.get("bearer")?.value; // name of your cookie
 
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
