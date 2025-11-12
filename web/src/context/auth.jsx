@@ -11,9 +11,10 @@ export const AuthProvider = ({ children }) => {
 
   const checkToken = async () => {
     const token = await cookieStore.get("bearer");
+    console.log(token)
 
     if (!token) {
-      router.push("/login");
+      // router.push("/login");
       return;
     }
   };

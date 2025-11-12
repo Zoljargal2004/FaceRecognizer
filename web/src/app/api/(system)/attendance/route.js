@@ -89,11 +89,12 @@ export async function PUT(req) {
     const endOfDay = new Date();
     endOfDay.setHours(23, 59, 59, 999);
 
-    const todayRecord = await db.collection("attendance").findOne({
-      email,
-      createdAt: { $gte: startOfDay, $lte: endOfDay },
-      sort: { createdAt: -1 }, // newest first
-    });
+    const todayRecord = await db
+      .collection("attendance")
+      .find({ email, createdAt: { $gte: startOfDay, $lte: endOfDay } })
+      .sort({ createdAt: -1 })
+      .limit(1)
+      .next();
 
     if (!todayRecord) {
       return NextResponse.json(

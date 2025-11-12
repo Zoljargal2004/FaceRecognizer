@@ -2,6 +2,7 @@ import requests
 
 def fetch(email=None):
     url = "http://localhost:3000/api/attendance"  # update if needed
+    print(email)
     try:
         if email:
             # Send POST request with JSON payload

@@ -8,18 +8,20 @@ import { Button } from "../ui/button";
 import { Loader2 } from "lucide-react";
 import { useLogin } from "@/services/login";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export default function LoginForm({ onToggleMode, onForgotPassword }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const router = useRouter()
 
   const { data, login, loading } = useLogin();
   useEffect(() => {
     if (data) {
       toast(data.error || data.message);
-      if (data.token) {
-        cookieStore.set("bearer", data.token);
-      }
+    }
+    if(data?.message){
+      router.push("/")
     }
   }, [data]);
   const handleLogin = () => {
