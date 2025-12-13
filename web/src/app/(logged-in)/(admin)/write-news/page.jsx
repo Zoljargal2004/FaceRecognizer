@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function WriteNewsPage() {
   const [html, setHtml] = useState("");
@@ -21,13 +21,24 @@ export default function WriteNewsPage() {
   const [isMounted, setIsMounted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [articleId, setArticleId] = useState(null);
+  const [loadingArticle, setLoadingArticle] = useState(false);
+  const [initialContent, setInitialContent] = useState("<p>Write your article here...</p>");
   const fileInputRef = useRef(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     setIsMounted(true);
     fetchTags();
-  }, []);
+    
+    // Check if editing
+    const editId = searchParams.get("edit");
+    if (editId) {
+      setArticleId(editId);
+      fetchArticle(editId);
+    }
+  }, [searchParams]);
 
   const fetchTags = async () => {
     try {
@@ -41,6 +52,34 @@ export default function WriteNewsPage() {
     }
   };
 
+  const fetchArticle = async (id) => {
+    setLoadingArticle(true);
+    try {
+      const res = await fetch(`/api/articles/${id}`);
+      if (res.ok) {
+        const data = await res.json();
+        const article = data.article;
+        
+        // Pre-fill form with article data
+        setTitle(article.title || "");
+        setTags(article.tags || []);
+        
+        // Set initial content for editor
+        if (article.code) {
+          setInitialContent(article.code);
+          setHtml(article.code);
+        }
+      } else {
+        toast.error("Failed to load article");
+      }
+    } catch (error) {
+      console.error("Failed to fetch article:", error);
+      toast.error("Failed to load article");
+    } finally {
+      setLoadingArticle(false);
+    }
+  };
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -50,14 +89,24 @@ export default function WriteNewsPage() {
       }),
       Image,
     ],
-    content: "<p>Write your article here...</p>",
+    content: initialContent,
     onUpdate: ({ editor }) => {
       setHtml(editor.getHTML());
     },
     immediatelyRender: false,
   });
 
-  if (!isMounted || !editor) {
+  // Update editor content when initial content changes (for editing)
+  useEffect(() => {
+    if (editor && initialContent && initialContent !== "<p>Write your article here...</p>") {
+      const currentContent = editor.getHTML();
+      if (currentContent === "<p>Write your article here...</p>" || currentContent === "<p></p>") {
+        editor.commands.setContent(initialContent);
+      }
+    }
+  }, [editor, initialContent]);
+
+  if (!isMounted || !editor || loadingArticle) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <Loader2 className="animate-spin" size={24} />
@@ -132,8 +181,13 @@ export default function WriteNewsPage() {
 
     setSubmitting(true);
     try {
-      const res = await fetch("/api/write-article", {
-        method: "POST",
+      const url = articleId 
+        ? `/api/articles/${articleId}` 
+        : "/api/write-article";
+      const method = articleId ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title,
@@ -145,18 +199,21 @@ export default function WriteNewsPage() {
       const data = await res.json();
 
       if (res.ok) {
-        toast.success("Article created successfully!");
+        toast.success(articleId 
+          ? "Article updated successfully!" 
+          : "Article created successfully!");
         // Reset form
         setTitle("");
         setTags([]);
+        setArticleId(null);
         editor.commands.setContent("<p>Write your article here...</p>");
-        router.push("/");
+        router.push("/manage-articles");
       } else {
-        toast.error(data.error || "Failed to create article");
+        toast.error(data.error || `Failed to ${articleId ? "update" : "create"} article`);
       }
     } catch (error) {
       console.error("Submit error:", error);
-      toast.error("Failed to submit article");
+      toast.error(`Failed to ${articleId ? "update" : "create"} article`);
     } finally {
       setSubmitting(false);
     }
@@ -165,9 +222,13 @@ export default function WriteNewsPage() {
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">Мэдээ бичих</h1>
+        <h1 className="text-3xl font-bold tracking-tight">
+          {articleId ? "Мэдээ засах" : "Мэдээ бичих"}
+        </h1>
         <p className="text-muted-foreground">
-          Шинэ мэдээний гарчиг, агуулга, таг нэмнэ үү.
+          {articleId 
+            ? "Мэдээний мэдээллийг засна уу."
+            : "Шинэ мэдээний гарчиг, агуулга, таг нэмнэ үү."}
         </p>
       </div>
 

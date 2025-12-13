@@ -1,5 +1,4 @@
 "use client";
-import { jwtDecode } from "jwt-decode";
 import {
   Sidebar,
   SidebarContent,
@@ -16,12 +15,14 @@ import {
   BookOpen,
   PaperclipIcon,
   NewspaperIcon,
+  Settings,
 } from "lucide-react";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useAuth } from "@/context/auth";
 
 export function AppSidebar() {
-  const [role, setRole] = useState("member");
+  const { user } = useAuth();
+  const role = user?.role || "member";
 
   const menu = [
     { icon: Home, name: "Overview", url: "/" },
@@ -32,23 +33,6 @@ export function AppSidebar() {
     { icon: BookOpen, name: "Classes", url: "/classes" },
     { icon: NewspaperIcon, name: "Мэдээ", url: "/news"}
   ];
-  useEffect(() => {
-    const token = getCookieValue("bearer");
-    if (!token) return;
-
-    try {
-      const decoded = jwtDecode(token);
-      setRole(decoded.role);
-    } catch (err) {
-      console.error("Failed to decode JWT:", err);
-    }
-  }, []);
-  const getCookieValue = (name) => {
-    const match = document.cookie.match(
-      new RegExp("(^| )" + name + "=([^;]+)")
-    );
-    return match ? match[2] : null;
-  };
 
   return (
     <Sidebar className="px-4">
@@ -67,14 +51,24 @@ export function AppSidebar() {
             </Link>
           ))}
           {role == "admin" && (
-            <Link
-              href={"/write-news"}
-              key={"news"}
-              className="flex items-center gap-3 text-lg text-muted-foreground hover:text-primary cursor-pointer"
-            >
-              <PaperclipIcon className="w-5 h-5" />
-              <span>{`Мэдээ бичих`}</span>
-            </Link>
+            <>
+              <Link
+                href={"/write-news"}
+                key={"write-news"}
+                className="flex items-center gap-3 text-lg text-muted-foreground hover:text-primary cursor-pointer"
+              >
+                <PaperclipIcon className="w-5 h-5" />
+                <span>{`Мэдээ бичих`}</span>
+              </Link>
+              <Link
+                href={"/manage-articles"}
+                key={"manage-articles"}
+                className="flex items-center gap-3 text-lg text-muted-foreground hover:text-primary cursor-pointer"
+              >
+                <Settings className="w-5 h-5" />
+                <span>{`Мэдээ удирдах`}</span>
+              </Link>
+            </>
           )}
         </SidebarGroup>
       </SidebarContent>
