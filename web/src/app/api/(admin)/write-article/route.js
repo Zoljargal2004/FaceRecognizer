@@ -1,9 +1,15 @@
+import clientPromise from "@/lib/mongodb";
+import { NextResponse } from "next/server";
+
 export async function POST(req) {
   try {
-    const { code, tags } = await req.json();
+    const { code, tags, title } = await req.json();
 
-    if (!tags && !tags.length && !code) {
-      throw new Error("Missing input");
+    if ((!tags || !tags.length) && !code && !title) {
+      return NextResponse.json(
+        { error: "Missing required fields: title, code, and tags" },
+        { status: 400 }
+      );
     }
 
     const client = await clientPromise;
@@ -11,8 +17,10 @@ export async function POST(req) {
     const articles = db.collection("articles");
 
     await articles.insertOne({
+      title: title || "Untitled",
       code,
-      tags,
+      tags: tags || [],
+      createdAt: new Date(),
     });
 
     return NextResponse.json({

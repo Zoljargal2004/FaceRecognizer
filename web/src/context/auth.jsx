@@ -1,29 +1,44 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import jwtDecode from "jwt-decode";
-import { useRouter } from "next/navigation";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const router = useRouter();
-
-  const checkToken = async () => {
-    const token = await cookieStore.get("bearer");
-    console.log(token)
-
-    if (!token) {
-      // router.push("/login");
-      return;
-    }
-  };
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    checkToken();
-  }, [router]);
+    const loadUser = async () => {
+      try {
+        const res = await fetch("/api/me", {
+          credentials: "include",
+        });
+
+        if (!res.ok) {
+          setUser(null);
+          return;
+        }
+
+        const data = await res.json();
+        setUser(data.user);
+      } catch {
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadUser();
+  }, []);
+
+  const logout = async () => {
+    await fetch("/api/logout", { method: "POST" });
+    window.location.href = "/login";
+  };
+
   return (
-    <AuthContext.Provider value={{}}>
+    <AuthContext.Provider value={{ user, loading, logout }}>
       {children}
     </AuthContext.Provider>
   );
