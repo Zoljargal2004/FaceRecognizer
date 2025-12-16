@@ -1,7 +1,7 @@
 import requests
 
 def fetch(email=None):
-    url = "http://localhost:3000/api/attendance"  # update if needed
+    url = "http://face-recognizer-lyart.vercel.app//api/attendance"  # update if needed
     print(email)
     try:
         if email:

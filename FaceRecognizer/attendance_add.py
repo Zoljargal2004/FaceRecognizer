@@ -1,7 +1,7 @@
 import requests
 
 def fetch(email=None):
-    url = "http://localhost:3000/api/attendance"  # update if needed
+    url = "http://face-recognizer-lyart.vercel.app//api/attendance"  # update if needed
     try:
         if email:
             # Send POST request with JSON payload
@@ -14,5 +14,6 @@ def fetch(email=None):
         print("✅ Request successful:", response.status_code)
         return response.json()
     except requests.exceptions.RequestException as e:
+        print()
         print("❌ Fetch failed:", e)
         return None
