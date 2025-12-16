@@ -6,7 +6,7 @@ import jwt from "jsonwebtoken";
 
 export async function GET(req, { params }) {
   try {
-    const { id } = params;
+    const { id } = await  params;
 
     if (!id) {
       return NextResponse.json(
@@ -40,7 +40,7 @@ export async function GET(req, { params }) {
 
 export async function PUT(req, { params }) {
   try {
-    const { id } = params;
+    const { id } = await  params;
     const { title, code, tags } = await req.json();
 
     if (!id) {
@@ -115,7 +115,7 @@ export async function PUT(req, { params }) {
 
 export async function DELETE(req, { params }) {
   try {
-    const { id } = params;
+    const { id } = await  params;
 
     if (!id) {
       return NextResponse.json(

@@ -6,8 +6,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { useAuth } from "@/context/auth";
-import { User, Mail, Shield, Calendar } from "lucide-react";
+import { User, Mail, Shield, Calendar, Trash2, Lock } from "lucide-react";
 import { toast } from "sonner";
 
 export default function ProfilePage() {
@@ -18,7 +29,10 @@ export default function ProfilePage() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    password: "",
   });
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (user?.email) {
@@ -29,17 +43,15 @@ export default function ProfilePage() {
   const fetchUserData = async () => {
     setLoading(true);
     try {
-      // In a real app, fetch from /api/user/profile
-      // For now, we'll use the user from auth context
-      setUserData({
-        name: user.name || "User",
-        email: user.email,
-        role: user.role || "member",
-        createdAt: new Date(),
-      });
+      const res = await fetch("/api/me");
+      if (!res.ok) throw new Error("Failed to load profile");
+      const data = await res.json();
+      const u = data.user;
+      setUserData(u);
       setFormData({
-        name: user.name || "User",
-        email: user.email,
+        name: u?.name || "",
+        email: u?.email || "",
+        password: "",
       });
     } catch (error) {
       console.error("Failed to fetch user data:", error);
@@ -50,13 +62,54 @@ export default function ProfilePage() {
   };
 
   const handleSave = async () => {
+    if (!formData.name && !formData.password) {
+      toast.error("Нэр эсвэл нууц үг шинэчлэх шаардлагатай");
+      return;
+    }
+    setSaving(true);
     try {
-      // In a real app, this would update via API
-      toast.success("Profile updated successfully");
+      const res = await fetch("/api/me", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.name,
+          password: formData.password || undefined,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error || "Шинэчлэхэд алдаа гарлаа");
+        return;
+      }
+      toast.success("Профайл шинэчлэгдлээ");
       setEditing(false);
+      fetchUserData();
     } catch (error) {
       console.error("Failed to update profile:", error);
-      toast.error("Failed to update profile");
+      toast.error("Шинэчлэхэд алдаа гарлаа");
+    } finally {
+      setSaving(false);
+      setFormData((prev) => ({ ...prev, password: "" }));
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm("Бүртгэлээ устгах уу? Энэ үйлдэл буцаахгүй.")) return;
+    setDeleting(true);
+    try {
+      const res = await fetch("/api/me", { method: "DELETE" });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error || "Устгахад алдаа гарлаа");
+        return;
+      }
+      toast.success("Бүртгэл устгагдлаа");
+      window.location.href = "/login";
+    } catch (error) {
+      console.error("Failed to delete account:", error);
+      toast.error("Устгахад алдаа гарлаа");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -154,10 +207,31 @@ export default function ProfilePage() {
             </div>
           )}
 
-          <div className="flex gap-4 pt-4">
+          <div className="space-y-2">
+            <Label htmlFor="password" className="flex items-center gap-2">
+              <Lock className="h-4 w-4" />
+              Шинэ нууц үг
+            </Label>
+            <Input
+              id="password"
+              type="password"
+              value={formData.password}
+              onChange={(e) =>
+                setFormData({ ...formData, password: e.target.value })
+              }
+              placeholder="********"
+            />
+            <p className="text-xs text-muted-foreground">
+              Нэр болон нууц үгээ шинэчлэх боломжтой.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-4 pt-4">
             {editing ? (
               <>
-                <Button onClick={handleSave}>Хадгалах</Button>
+                <Button onClick={handleSave} disabled={saving}>
+                  {saving ? "Хадгалж байна..." : "Хадгалах"}
+                </Button>
                 <Button
                   variant="outline"
                   onClick={() => {
@@ -165,8 +239,10 @@ export default function ProfilePage() {
                     setFormData({
                       name: userData?.name || "",
                       email: userData?.email || "",
+                      password: "",
                     });
                   }}
+                  disabled={saving}
                 >
                   Цуцлах
                 </Button>
@@ -174,6 +250,36 @@ export default function ProfilePage() {
             ) : (
               <Button onClick={() => setEditing(true)}>Засах</Button>
             )}
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="destructive"
+                  className="ml-auto"
+                  disabled={deleting}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Бүртгэл устгах
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Бүртгэл устгах уу?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Энэ үйлдлийг буцаах боломжгүй. Та бүх мэдээллээ устгахдаа итгэлтэй байна уу?
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel disabled={deleting}>Цуцлах</AlertDialogCancel>
+                  <AlertDialogAction
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    onClick={handleDelete}
+                    disabled={deleting}
+                  >
+                    {deleting ? "Устгаж байна..." : "Устгах"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </CardContent>
       </Card>

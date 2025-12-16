@@ -16,6 +16,7 @@ import {
   PaperclipIcon,
   NewspaperIcon,
   Settings,
+  ShoppingBag,
 } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/context/auth";
@@ -25,13 +26,14 @@ export function AppSidebar() {
   const role = user?.role || "member";
 
   const menu = [
-    { icon: Home, name: "Overview", url: "/" },
-    { icon: User, name: "Profile", url: "/profile" },
-    { icon: CalendarCheck, name: "Attendance", url: "/attendance" },
-    { icon: Activity, name: "Monitor", url: "/monitor" },
-    { icon: Newspaper, name: "News", url: "/news" },
-    { icon: BookOpen, name: "Classes", url: "/classes" },
-    { icon: NewspaperIcon, name: "Мэдээ", url: "/news"}
+    { icon: Home, name: "Home", url: "/" },
+    { icon: User, name: "Профайл", url: "/profile" },
+    { icon: CalendarCheck, name: "Ирц", url: "/attendance" },
+    { icon: Activity, name: "Үзүүлэлт", url: "/monitor" },
+    // { icon: Newspaper, name: "Мэдээ", url: "/news" },
+    { icon: BookOpen, name: "Анги", url: "/classes" },
+    { icon: ShoppingBag, name: "Дэлгүүр", url: "/shop" },
+    { icon: NewspaperIcon, name: "Мэдээ", url: "/news"},
   ];
 
   return (
@@ -67,6 +69,22 @@ export function AppSidebar() {
               >
                 <Settings className="w-5 h-5" />
                 <span>{`Мэдээ удирдах`}</span>
+              </Link>
+              <Link
+                href={"/manage-classes"}
+                key={"manage-classes"}
+                className="flex items-center gap-3 text-lg text-muted-foreground hover:text-primary cursor-pointer"
+              >
+                <Settings className="w-5 h-5" />
+                <span>{`Хичээл удирдах`}</span>
+              </Link>
+              <Link
+                href={"/manage-shop"}
+                key={"manage-shop"}
+                className="flex items-center gap-3 text-lg text-muted-foreground hover:text-primary cursor-pointer"
+              >
+                <Settings className="w-5 h-5" />
+                <span>{`Дэлгүүр удирдах`}</span>
               </Link>
             </>
           )}

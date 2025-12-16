@@ -18,44 +18,18 @@ export default function ClassesPage() {
   const fetchClasses = async () => {
     setLoading(true);
     try {
-      // In a real app, this would fetch from /api/classes
-      // Simulating with sample data
-      setTimeout(() => {
-        setClasses([
-          {
-            _id: "1",
-            name: "Йога",
-            instructor: "Б.Сараа",
-            schedule: "Даваа, Мягмар 18:00-19:00",
-            capacity: 20,
-            enrolled: 15,
-            description: "Йогагийн анхан шатны хичээл",
-          },
-          {
-            _id: "2",
-            name: "Кардио",
-            instructor: "Д.Бат",
-            schedule: "Лхагва, Пүрэв 19:00-20:00",
-            capacity: 25,
-            enrolled: 20,
-            description: "Кардио дасгал",
-          },
-          {
-            _id: "3",
-            name: "Хүч чадлын дасгал",
-            instructor: "Ц.Мөнх",
-            schedule: "Баасан, Бямба 17:00-18:00",
-            capacity: 15,
-            enrolled: 12,
-            description: "Хүч чадлын дасгал",
-          },
-        ]);
-        setLoading(false);
-      }, 1000);
+      const res = await fetch("/api/classes");
+      const data = await res.json();
+      if (res.ok) {
+        setClasses(data.classes || []);
+      } else {
+        setClasses([]);
+      }
     } catch (error) {
       console.error("Failed to fetch classes:", error);
-      setLoading(false);
+      setClasses([]);
     }
+    setLoading(false);
   };
 
   if (loading) {

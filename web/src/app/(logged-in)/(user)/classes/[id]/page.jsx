@@ -8,12 +8,14 @@ import { Button } from "@/components/ui/button";
 import { BookOpen, Users, Clock, Calendar, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { useAuth } from "@/context/auth";
 
 export default function ClassDetailPage() {
   const params = useParams();
+  const { user } = useAuth();
   const [classItem, setClassItem] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [enrolled, setEnrolled] = useState(false);
+  const [enrolling, setEnrolling] = useState(false);
 
   useEffect(() => {
     if (params.id) {
@@ -24,42 +26,58 @@ export default function ClassDetailPage() {
   const fetchClass = async () => {
     setLoading(true);
     try {
-      // In a real app, fetch from /api/classes/[id]
-      // Simulating with sample data
-      setTimeout(() => {
-        setClassItem({
-          _id: params.id,
-          name: "Йога",
-          instructor: "Б.Сараа",
-          schedule: "Даваа, Мягмар 18:00-19:00",
-          capacity: 20,
-          enrolled: 15,
-          description:
-            "Йогагийн анхан шатны хичээл. Энэ хичээлд та биеийн хөгжлийг сайжруулах, сэтгэл санааны тайвшралыг олж авах боломжтой.",
-          location: "Гол танхим",
-          duration: "60 минут",
-        });
-        setLoading(false);
-      }, 1000);
+      const res = await fetch(`/api/classes/${params.id}`);
+      const data = await res.json();
+      if (res.ok) {
+        setClassItem(data.class);
+      } else {
+        setClassItem(null);
+      }
     } catch (error) {
       console.error("Failed to fetch class:", error);
-      setLoading(false);
+      setClassItem(null);
     }
+    setLoading(false);
   };
 
-  const handleEnroll = () => {
-    if (enrolled) {
-      toast.info("Та аль хэдийн бүртгүүлсэн байна");
+  const updateEnrollment = async (action) => {
+    if (!classItem?._id) return;
+    if (!user?.id) {
+      toast.error("Нэвтэрч ороод дахин оролдоно уу");
       return;
     }
 
-    if (classItem.enrolled >= classItem.capacity) {
-      toast.error("Хичээл дүүрсэн байна");
-      return;
+    setEnrolling(true);
+    try {
+      const res = await fetch(`/api/classes/${classItem._id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success(
+          action === "enroll" ? "Амжилттай бүртгүүллээ" : "Бүртгэл цуцлагдлаа"
+        );
+        // Refresh class data
+        setClassItem((prev) =>
+          prev
+            ? {
+                ...prev,
+                enrolled: data.enrolled,
+                enrolledUsers: data.enrolledUsers || prev.enrolledUsers || [],
+              }
+            : prev
+        );
+      } else {
+        toast.error(data.error || "Алдаа гарлаа");
+      }
+    } catch (error) {
+      console.error("Enrollment error:", error);
+      toast.error("Алдаа гарлаа");
+    } finally {
+      setEnrolling(false);
     }
-
-    setEnrolled(true);
-    toast.success("Амжилттай бүртгүүллээ");
   };
 
   if (loading) {
@@ -168,16 +186,44 @@ export default function ClassDetailPage() {
                 }}
               />
             </div>
+            <div className="text-xs text-muted-foreground mb-3">
+              {classItem.enrolledUsers?.length || classItem.enrolled || 0} /{" "}
+              {classItem.capacity} бүртгүүлсэн
+            </div>
             <Button
-              onClick={handleEnroll}
-              disabled={enrolled || classItem.enrolled >= classItem.capacity}
+              onClick={() => updateEnrollment("enroll")}
+              disabled={
+                enrolling ||
+                classItem.enrolled >= classItem.capacity ||
+                (classItem.enrolledUsers || []).some(
+                  (u) => u === user?.id || u === user?._id
+                )
+              }
               className="w-full"
             >
-              {enrolled
-                ? "Бүртгүүлсэн"
+              {enrolling
+                ? "Ачаалж байна..."
                 : classItem.enrolled >= classItem.capacity
                 ? "Дүүрсэн"
+                : (classItem.enrolledUsers || []).some(
+                    (u) => u === user?.id || u === user?._id
+                  )
+                ? "Бүртгүүлсэн"
                 : "Бүртгүүлэх"}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => updateEnrollment("unenroll")}
+              disabled={
+                enrolling ||
+                classItem.enrolled === 0 ||
+                !(classItem.enrolledUsers || []).some(
+                  (u) => u === user?.id || u === user?._id
+                )
+              }
+              className="w-full mt-2"
+            >
+              {enrolling ? "Ачаалж байна..." : "Бүртгэл арилгах"}
             </Button>
           </div>
         </CardContent>
