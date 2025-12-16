@@ -1,6 +1,9 @@
 import clientPromise from "@/lib/mongodb";
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+
+const JWT_SECRET = process.env.JWT_SECRET!;
 
 export async function POST(req: Request) {
   try {
@@ -26,10 +29,10 @@ export async function POST(req: Request) {
       );
     }
 
-    // Hash the password
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Insert new user
+    // Insert user
     const result = await users.insertOne({
       name,
       email,
@@ -38,8 +41,19 @@ export async function POST(req: Request) {
       createdAt: new Date(),
     });
 
-    // Return created user info (without password)
-    return NextResponse.json({
+    // 🔐 Create JWT
+    const token = jwt.sign(
+      {
+        id: result.insertedId.toString(),
+        email,
+        role,
+      },
+      JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    // Build response
+    const response = NextResponse.json({
       message: "User created successfully",
       user: {
         id: result.insertedId,
@@ -48,8 +62,24 @@ export async function POST(req: Request) {
         role,
       },
     });
+
+    // 🍪 Set HTTP-only bearer cookie
+    response.cookies.set({
+      name: "bearer",
+      value: token,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60, // 7 days
+      path: "/",
+    });
+
+    return response;
   } catch (err) {
     console.error(err);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }

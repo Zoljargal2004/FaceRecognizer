@@ -3,6 +3,7 @@
 import { useState } from "react";
 import LoginForm from "@/components/auth/loginForm";
 import ForgotPasswordForm from "@/components/auth/forgotPassword";
+import SignupForm from "@/components/auth/signUp"
 
 export default function AuthPage() {
   const [mode, setMode] = useState("login");
@@ -25,7 +26,7 @@ export default function AuthPage() {
 
       
 
-        {/* {mode == "signup" && <SignupForm onToggleMode={() => setMode("login")} />} */}
+        {mode == "signup" && <SignupForm onToggleMode={() => setMode("login")} />}
 
         {mode === "forgot-password" && <ForgotPasswordForm onBack={() => setMode("login")} />}
       </div>
