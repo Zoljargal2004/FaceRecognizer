@@ -17,34 +17,32 @@ import { jwtDecode } from "jwt-decode";
 
 export default function CreateNewPassword(token) {
   const { loading, data, resetPassword } = useResetPassword();
-  const {email} = jwtDecode(token.token)
-  const [password, setPassword] = useState()
+  const { email } = jwtDecode(token.token);
+  const [password, setPassword] = useState();
 
-  useEffect(()=>{
-    if(!data) return
-    else if(data.error) {
-        toast(data.error)
-        return
-    }
-    else{
-        return data.message
-    }
-  },[data])
+  useEffect(() => {
+    if (!data) return;
 
-  const handleSubmit =  () => {
-    const retype = document.getElementById("retype")
-    if(retype.value != password){
-        toast("Шинэ нууц үг дахин бичсэнтэй таарахгүй байна.")
-        return
+    if (data.error) {
+      toast.error(data.error);
+    } else if (data.message) {
+      toast.success("Амжилттай нууц үг өөрчлөглдлөө.");
     }
-    else{
-        resetPassword(email, password, token)
+  }, [data]);
+
+  const handleSubmit = () => {
+    const retype = document.getElementById("retype");
+    if (retype.value != password) {
+      toast("Шинэ нууц үг дахин бичсэнтэй таарахгүй байна.");
+      return;
+    } else {
+      resetPassword(email, password, token);
     }
-  }
+  };
   return (
     <Card>
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl font-bold">Change Password</CardTitle>
+        <CardTitle className="text-2xl font-bold">Нууц үг солих</CardTitle>
       </CardHeader>
       <CardContent>
         <form
@@ -55,7 +53,7 @@ export default function CreateNewPassword(token) {
           }}
         >
           <label className="font-bold" htmlFor="email">
-            Write the new password here
+            Шинэ нууц үг
           </label>
           <Input
             type={"password"}
@@ -63,7 +61,7 @@ export default function CreateNewPassword(token) {
             onChange={(e) => setPassword(e.target.value)}
           />
           <label className="font-bold" htmlFor="email">
-            Retype the new password
+            Дахин бичнэ үү
           </label>
           <Input
             id="retype"
@@ -74,10 +72,10 @@ export default function CreateNewPassword(token) {
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Sending...
+                Илгээж байна
               </>
             ) : (
-              "Send Reset Instructions"
+              "Илгээх"
             )}
           </Button>
         </form>

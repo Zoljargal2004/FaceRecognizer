@@ -13,7 +13,7 @@ export default function AuthPage() {
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-primary mb-2">FitTracker</h1>
           <p className="text-muted-foreground">
-            Your fitness journey starts here
+            Өчигдрөөс 1% илүү
           </p>
         </div>
         {mode == "login" && (

@@ -14,7 +14,7 @@ export default function Page() {
       </div>
 
       <div className="">
-        <div className="flex flex-row flex-wrap gap-6">
+        <div className="grid grid-cols-1  md:grid-cols-3 flex-wrap gap-6">
           <AttendanceToday />
           <AttendenceWeek />
           <AvgDuration />

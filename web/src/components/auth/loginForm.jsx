@@ -54,7 +54,7 @@ export default function LoginForm({ onToggleMode, onForgotPassword }) {
         </div>
         <div className="flex flex-col gap-4">
           <Label className="font-bold" htmlFor="Password">
-            Password
+            Нууц үг
           </Label>
           <Input
             type={"password"}
@@ -66,9 +66,9 @@ export default function LoginForm({ onToggleMode, onForgotPassword }) {
           {(loading && (
             <div className="flex gap-2 items-center">
               <Loader2 className="animate-spin" size={14} />
-              <Label>Loading</Label>
+              <Label>Уншиж байна</Label>
             </div>
-          )) || <Label>Login</Label>}
+          )) || <Label>Нэвтрэх</Label>}
         </Button>
       </form>
       <div className="text-center space-y-2">
@@ -78,17 +78,17 @@ export default function LoginForm({ onToggleMode, onForgotPassword }) {
           onClick={onForgotPassword}
           className="text-sm"
         >
-          Forgot your password?
+          Нууц үг мартсан?
         </Button>
         <div className="text-sm text-muted-foreground">
-          {"Don't have an account? "}
+          
           <Button
             type="button"
             variant="link"
             onClick={onToggleMode}
             className="p-0 h-auto font-medium"
           >
-            Sign up
+            Бүртгүүлэх
           </Button>
         </div>
       </div>

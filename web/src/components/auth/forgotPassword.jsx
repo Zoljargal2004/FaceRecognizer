@@ -33,10 +33,10 @@ export default function ForgotPasswordForm({ onBack }) {
     <>
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Reset Password</CardTitle>
+          <CardTitle className="text-2xl font-bold">Нууц үг сэргээх</CardTitle>
           <CardDescription>
-            Enter your email address and we'll send you instructions to reset
-            your password
+            Имэйл хаягаа оруулна уу. Бид танд нууц үгээ шинэчлэх зааврыг
+            илгээнэ.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -52,17 +52,17 @@ export default function ForgotPasswordForm({ onBack }) {
             </label>
             <Input
               type={"email"}
-              placeholder="Enter your Email"
+              placeholder="example@gmail.com"
               onChange={(e) => setEmail(e.target.value)}
             />
             <Button type="submit" className="w-full mt-4" disabled={loading}>
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Sending...
+                  Илгээж байна
                 </>
               ) : (
-                "Send Reset Instructions"
+                "Илгээх"
               )}
             </Button>
 
@@ -73,7 +73,7 @@ export default function ForgotPasswordForm({ onBack }) {
               className="w-full"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Sign In
+              Нэвтрэх зэс рүү буцах
             </Button>
           </form>
         </CardContent>

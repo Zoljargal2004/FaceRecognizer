@@ -9,6 +9,9 @@ export function middleware(request: NextRequest) {
   if (pathname.startsWith("/api")) {
     return NextResponse.next();
   }
+  if (pathname.startsWith("/change-password")) {
+    return NextResponse.next();
+  }
 
   // Ignore Next internals
   if (
