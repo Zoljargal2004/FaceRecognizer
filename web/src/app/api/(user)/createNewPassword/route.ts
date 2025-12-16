@@ -27,7 +27,7 @@ export async function POST(req :Request) {
       expiresAt: new Date(Date.now() + 10 * 60 * 1000),
     });
 
-    const resetUrl = `http://localhost:3000/change-password/${token}`;
+    const resetUrl = `http://face-recognizer-lyart.vercel.app/change-password/${token}`;
 
     const res = await sendEmail(
       `<div>
